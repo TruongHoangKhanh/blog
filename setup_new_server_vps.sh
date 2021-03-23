@@ -66,6 +66,7 @@ function main() {
 		config 
 		ubuntu
 	fi
+	history -c
 }
 
 main
