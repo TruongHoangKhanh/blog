@@ -56,7 +56,8 @@ function centos() {
 }
 
 function main() {
-	if [[ $OS == "6" ]]; then
+	checkVersion
+	if [[ $OS == "6" || $OS == "7" ]]; then
 		disable
 		config
 		centos
